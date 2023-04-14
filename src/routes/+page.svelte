@@ -2,11 +2,29 @@
   import Game from './Game.svelte';
   import '../styles.css';
   import Modal from './Modal.svelte';
+  import { levels } from './levels';
+  import { confetti } from '@neoconfetti/svelte';
 
   let state: 'waiting' | 'playing' | 'paused' | 'won' | 'lost' = 'waiting';
+
+  let game: Game;
 </script>
 
-<Game />
+<Game
+  bind:this={game}
+  on:play={() => {
+    state = 'playing';
+  }}
+  on:pause={() => {
+    state = 'paused';
+  }}
+  on:win={() => {
+    state = 'won';
+  }}
+  on:lose={() => {
+    state = 'lost';
+  }}
+/>
 {#if state !== 'playing'}
   <Modal>
     <header>
@@ -21,18 +39,76 @@
     {:else if state === 'waiting'}
       <p>choose a level:</p>
     {/if}
+
+    <div class="buttons">
+      {#if state === 'paused'}
+        <button
+          on:click={() => {
+            game.resume();
+          }}>resume</button
+        >
+        <button
+          on:click={() => {
+            state = 'waiting';
+          }}>quit</button
+        >
+      {:else}
+        {#each levels as level}
+          <button
+            on:click={() => {
+              game.start(level);
+            }}>{level.label}</button
+          >
+        {/each}
+      {/if}
+    </div>
   </Modal>
+{/if}
+
+{#if state === 'won'}
+  <div
+    class="confetti"
+    use:confetti={{ stageWidth: innerWidth, stageHeight: innerHeight }}
+  />
 {/if}
 
 <style>
   h1 {
     font-size: 4em;
+    text-align: center;
+    margin-bottom: 0.25em;
   }
   h1 span {
     color: purple;
   }
 
-  p {
+  .buttons {
+    display: flex;
+    gap: 1em;
+    font-family: inherit;
+  }
+  .buttons button {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 1rem;
     font-family: Grandstander;
+    font-size: 1.25rem;
+    color: black;
+    background: white;
+    border: 5px solid purple;
+  }
+
+  p {
+    text-align: center;
+    font-family: Grandstander;
+  }
+
+  .confetti {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 50%;
+    top: 30%;
+    pointer-events: none;
   }
 </style>
