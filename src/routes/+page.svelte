@@ -84,6 +84,8 @@
 
   .buttons {
     display: flex;
+    justify-content: center;
+    align-items: center;
     gap: 1em;
     font-family: inherit;
   }
